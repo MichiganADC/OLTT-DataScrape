@@ -11,7 +11,6 @@ import helpers as hlps
 import config as cfg
 import helper as hlp
 
-
 # Top-level directory to all OLTT data
 oltt_path = "/Users/ldmay/Box/MADC Box Account/Clinical Core/OLTT/OLTT Data/"
 
@@ -137,7 +136,7 @@ for file_set in file_sets:
 
     # If IDs match and the Visit Number is extractable, add those, the path, and the filenames to the record
     if ids_match and visit_num_from_path:
-        record = {'ptid': "UM" + "0"*(8-len(str(id_int))) + str(id_int),
+        record = {'ptid': "UM" + "0" * (8 - len(str(id_int))) + str(id_int),
                   'visit_num': visit_num_from_path,
                   'adj_visit_num': adj_visit_num_from_path,
                   'redcap_event_name': redcap_visit_str,
@@ -218,9 +217,9 @@ cols_set_11a = ["dot_cal_aerr_11a", "dot_cal_at_11a", "fr_aerr_11a", "fr_at_11a"
                 "cr_aerr_11a", "cr_at_11a", "rt_correct_11a", "ra_time_11a"]
 cols_redcap = cols_id_vis + cols_set_7a + cols_set_11a
 
-df_oltt_all = pd.DataFrame.\
-    from_records(records)[cols_redcap].\
-    sort_values(cols_id_vis).\
+df_oltt_all = pd.DataFrame. \
+    from_records(records)[cols_redcap]. \
+    sort_values(cols_id_vis). \
     reset_index(drop=True)
 
 # Collapse 7A and 11A rows
@@ -282,13 +281,17 @@ fields_fv_raw = ["ptid",
 fields_fv = ",".join(fields_fv_raw)
 
 fields = fields_iv + fields_fv
+fields_raw = fields_iv_raw + fields_fv_raw
 
 # Retrieve data from REDCap
 print("Retrieving REDCap UMMAP - UDS3 data via API...")
-df_u3 = hlps.export_redcap_records(uri=cfg.REDCAP_API_URI,
-                                   token=cfg.REDCAP_API_TOKEN_UMMAP_UDS3n,
-                                   fields=fields,
-                                   records=ids)
+df_u3 = hlps.retrieve_redcap_records(
+    redcap_api_uri=cfg.REDCAP_API_URI,
+    redcap_project_token=cfg.REDCAP_API_TOKEN_UMMAP_UDS3n,
+    fields_raw=fields_raw,
+    records_raw=ids_raw,
+    vp=False
+)
 
 # Define Boolean Series for filtering DFs
 is_init_visit = df_u3['redcap_event_name'] == 'visit_1_arm_1'
@@ -354,8 +357,8 @@ df_oltt_fv_flt = pd.merge(df_u3_fv_flt_sel, df_oltt_fv,
 
 # Combine the initial- and follow-up-visit OLTT DFs into on DF
 print("Combining all OLTT data...")
-df_oltt_flt = pd.concat([df_oltt_iv_flt, df_oltt_fv_flt], axis='rows').\
-    sort_values(['ptid', 'redcap_event_name']).\
+df_oltt_flt = pd.concat([df_oltt_iv_flt, df_oltt_fv_flt], axis='rows'). \
+    sort_values(['ptid', 'redcap_event_name']). \
     reset_index(drop=True)
 
 # Coerce count columns to int
